@@ -1,0 +1,42 @@
+body {
+  padding-top: 70px;
+}
+
+.break {
+    margin-top: 100px;
+    border-top: 1px solid #101010;
+    padding-top: 20px;
+}
+
+#users-result {
+    padding-left: 0px;
+}
+
+#users-result li {
+  padding: 10px 10px;
+  background-color: #333333;
+  color: #ffffff;
+  margin-right: 3px;
+  list-style-type: none;
+  #
+}
+
+#users-result li:nth-child(odd) {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.up {
+  padding: 10px 10px;
+  background-color: #52D273;
+}
+
+.down {
+  padding: 10px 10px;
+  background-color: #E82C0C;
+}
+
+.footer {
+    margin: auto;
+    text-align: center;
+}

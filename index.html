@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Demo for Civis!</title>
+
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/custom.css" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Civis Demo</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li id="home"><a href="#">Home</a></li>
+                <li id="add-user"><a href="#">Add User</a></li>
+                <li id="delete-user"><a href="#">Delete User</a></li>
+                <li id="update-user"><a href="#">Update User</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="jumbotron" id="monitor">
+        <p>Users:</p>
+        <div>
+            <ul id="users-result">
+
+            </ul>
+        </div>
+        <div>
+        <p>This is using jQuery AJAX to hit a RESTful web service that queries a database for users.</p>
+        </div>
+
+        <div class="break">
+            <p>Monitors:</p>
+            <div id="monitors-result1">
+            </div>
+            <div id="monitors-result2">
+            </div>
+            <div id="monitors-users">
+            </div>
+            <p>This is also using jQuery AJAX to hit a few webservices that are designed to monitor the application.</p>
+        </div>
+    </div>
+
+    <div class="jumbotron" id="create-user" hidden>
+      <form id="createUserForm">
+
+          <p>Create User:</p><input id="username" name="username" type="text" class="form-control" placeholder="Username"/>
+
+          <br>
+          <br>
+          <input type="submit" class="btn btn-success" value="Create" id="createUserBtn"/>
+
+      </form>
+    </div>
+
+    <div class="jumbotron" id="update-user" hidden>
+      <form id="updateUserForm">
+
+          <p>Update an existing User:</p>
+            <p>Select a User:</p>
+            <select id="userSelector" name="modelSelector" class="selector form-control">
+                <option value=""></option>
+            </select>
+
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="deleteModelCheckbox">Delete Model
+                </label>
+            </div>
+            <div class="alert alert-danger" role="alert" id="alertDeleteModel"hidden>Model will be deleted.</div>
+            <div id="modelFormWrapper">
+            <div hidden><h3>Model Name: </h3><input type="text" class="form-control" placeholder="model name" id="modelName" name="modelName" disabled></div>
+            <h3>Model Bio: </h3><input type="text" class="form-control" placeholder="model bio" id="modelBio" name="modelBio" required autofocus>
+
+
+
+
+            </div>
+
+            <br>
+            <br>
+            <button class="btn btn-lg btn-primary btn-block" id="submitBtn" type="submit">Update Model</button>
+
+            <br>
+            <div id="notificationCenter"></div>
+
+      </form>
+    </div>
+
+</div> <!-- /container -->
+
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted">Copyleft 2015 John Kerkstra - Find this project on <a href="https://github.com/captainkerk/ballin-octo-spice">GitHib!</a></p>
+    </div>
+</footer>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+
+
+    getUsers();
+
+    hc1=$.get( '/hc1', function( data ) {
+        $('#monitors-result1').append('<div class="up">Monitor #1 is reporting ok.</div>');
+    });
+    hc1.error(function(jqXHR, textStatus, errorThrow){
+        $('#monitors-result1').append('<div class="down">Monitor #1 is down.</div>');
+    });
+
+    hc2=$.get( '/hc2', function( data ) {
+        $('#monitors-result2').append('<div class="up">Monitor #2 is reporting ok.</div>');
+    });
+    hc2.error(function(jqXHR, textStatus, errorThrow){
+        $('#monitors-result2').append('<div class="down">Monitor #2 is down.</div>');
+    });
+
+
+
+    $('#createUserForm').submit(function(event) {
+
+        event.preventDefault();
+        var jsonForm = JSON.stringify($('#createUserForm').serializeObject());
+
+        request = $.ajax({
+            url: '/createUser',
+            type: 'post',
+            contentType: 'application/json',
+            data: jsonForm
+        });
+
+        request.done(function (response, textStatus, jqXHR){
+            alert(response.status);
+            $('#username').val('');
+        });
+    });
+
+
+
+
+    //nav buttons
+    $('#home').click(function(){
+        $('#create-user').hide();
+        $('#users-result').innerHTML = '';
+        getUsers();
+        $('#monitor').show();
+    });
+    $('#add-user').click(function() {
+        $('#create-user').show();
+        $('#monitor').hide();
+    });
+
+    //functions for user stuff
+    function getUsers() {
+
+        var users = [];
+        $('#monitors-users').html('');
+
+        request=$.get( '/users', function( data ) {
+
+            for(i = 0; i < data.length; i++) {
+                var user = new Object();
+                user = data.users[i];
+                users.push(user);
+            }
+            $('#monitors-users').append('<div class="up">Database monitor is reporting ok.</div>');
+        });
+
+        request.error(function(jqXHR, textStatus, errorThrow){
+
+            $('#monitors-users').append('<div class="down">Database monitor is down.</div>');
+        });
+        request.always(function () {
+            drawUsers(users);
+        });
+    }
+
+    function drawUsers(users) {
+        $('#users-result').empty();
+
+        users.forEach(function(user) {
+            $('#users-result').append('<li>' + user.user.Username+ '</li>');
+        });
+    }
+});
+
+
+//marshall json function
+$.fn.serializeObject = function()
+{
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+};
+</script>
+</body>
+</html>
