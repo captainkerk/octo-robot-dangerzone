@@ -3,9 +3,7 @@ $("#updateSubmit").click(function(event){
             if (request) {
                 request.abort();
             }
-
-
-            //disable form and start spinner
+            
             $("#submitBtn").prop("disabled",true);
 
             var requestType = "update";
@@ -13,8 +11,6 @@ $("#updateSubmit").click(function(event){
             if($("#deleteModelCheckbox").is(":checked")) {
                 requestType = "delete";
             }
-
-
 
             request = $.ajax({
                 url: "/updateUser",

@@ -1,6 +1,6 @@
 # octo-robot-dangerzone
 
-This app requires a file called 'aws.config' and is assumed to be in the root of the application's directory.
+This app requires a file called 'aws.config'. The location of this file is changeable in the main app.js 
 
 The aws.config file must contain your AWS credentials in JSON format. Example:
 

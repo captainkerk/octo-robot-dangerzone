@@ -4,7 +4,7 @@ var aws = require('aws-sdk');
 var crypto = require('crypto');
 var bodyParser = require('body-parser');
 
-aws.config.loadFromPath('./aws.config');
+aws.config.loadFromPath('/code/awsconfig/aws.config');
 
 //parse POSTs as JSON
 app.use(bodyParser.json());
@@ -73,7 +73,9 @@ app.get('/getTables', function(req, res){
 
 app.post('/createUser', function (req, res) {
 
-  var username = req.body.username;
+  	var username = req.body.username;
+	var bio = req.body.bio;
+	var quote = req.body.quote;
 	var id = crypto.randomBytes(6).toString('hex');
 	var db = new aws.DynamoDB();
 
@@ -81,7 +83,9 @@ app.post('/createUser', function (req, res) {
 		"TableName":"Users",
 				"Item":{
 						"UserID" : {"S": id},
-						"Username":{"S": username}
+						"Username":{"S": username},
+						"Bio":{"S": bio},
+						"Quote":{"S": quote}
 				}
 	},
 	function(result) {

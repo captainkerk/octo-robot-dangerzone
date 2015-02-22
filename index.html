@@ -64,10 +64,17 @@
       <form id="createUserForm">
 
           <p>Create User:</p><input id="username" name="username" type="text" class="form-control" placeholder="Username"/>
+          <br>
 
+          <input id="bio" name="bio" type="text" class="form-control" placeholder="Biography"/>
+          <br>
+
+          <input id="quote" name="quote" type="text" class="form-control" placeholder="Quote"/>
           <br>
           <br>
           <input type="submit" class="btn btn-success" value="Create" id="createUserBtn"/>
+
+
 
       </form>
     </div>
@@ -90,7 +97,6 @@
             <div id="modelFormWrapper">
             <div hidden><h3>Model Name: </h3><input type="text" class="form-control" placeholder="model name" id="modelName" name="modelName" disabled></div>
             <h3>Model Bio: </h3><input type="text" class="form-control" placeholder="model bio" id="modelBio" name="modelBio" required autofocus>
-
 
 
 
@@ -154,8 +160,10 @@ $(document).ready(function() {
         });
 
         request.done(function (response, textStatus, jqXHR){
-            alert(response.status);
+            
             $('#username').val('');
+            $('#bio').val('');
+            $('#quote').val('');
         });
     });
 
