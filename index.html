@@ -26,10 +26,9 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li id="home"><a href="#">Home</a></li>
-                <li id="add-user"><a href="#">Add User</a></li>
-                <li id="delete-user"><a href="#">Delete User</a></li>
-                <li id="update-user"><a href="#">Update User</a></li>
+                <li id="home" class="action" data-action="#monitor"><a href="#">Home</a></li>
+                <li id="add" class="action" data-action="#create-user"><a href="#">Add User</a></li>
+                <li id="update" class="action"data-action="#update-user"><a href="#">Update User</a></li>
             </ul>
         </div><!--/.nav-collapse -->
     </div>
@@ -45,7 +44,7 @@
             </ul>
         </div>
         <div>
-        <p>This is using jQuery AJAX to hit a RESTful web service that queries a database for users.</p>
+        <p>This is using jQuery AJAX to hit a RESTful web service that queries a DynamoDB instance for users.</p>
         </div>
 
         <div class="break">
@@ -72,7 +71,7 @@
           <input id="quote" name="quote" type="text" class="form-control" placeholder="Quote"/>
           <br>
           <br>
-          <input type="submit" class="btn btn-success" value="Create" id="createUserBtn"/>
+          <input type="submit" class="btn btn-primary" value="Create" id="createUserBtn"/>
 
 
 
@@ -90,22 +89,22 @@
 
             <div class="checkbox">
                 <label>
-                    <input type="checkbox" id="deleteModelCheckbox">Delete Model
+                    <input type="checkbox" id="deleteModelCheckbox">Delete User
                 </label>
             </div>
-            <div class="alert alert-danger" role="alert" id="alertDeleteModel"hidden>Model will be deleted.</div>
+            <div class="alert alert-danger" role="alert" id="alertDeleteModel"hidden>User will be deleted.</div>
             <div id="modelFormWrapper">
-            <div hidden><h3>Model Name: </h3><input type="text" class="form-control" placeholder="model name" id="modelName" name="modelName" disabled></div>
-            <h3>Model Bio: </h3><input type="text" class="form-control" placeholder="model bio" id="modelBio" name="modelBio" required autofocus>
-
+            <div hidden><h3>User Name: </h3><input type="text" class="form-control" placeholder="model name" id="username" name="username" disabled></div>
+            <p>Bio: </p><input type="text" class="form-control" placeholder="bio" id="bio" name="bio">
+            <p>Quote: </p><input type="text" class="form-control" placeholder="quote" id="quote" name="quote">
 
 
             </div>
 
             <br>
             <br>
-            <button class="btn btn-lg btn-primary btn-block" id="submitBtn" type="submit">Update Model</button>
 
+            <input type="submit" class="btn btn-primary" value="Update" id="updateUserBtn"/>
             <br>
             <div id="notificationCenter"></div>
 
@@ -116,13 +115,14 @@
 
 <footer class="footer">
     <div class="container">
-        <p class="text-muted">Copyleft 2015 John Kerkstra - Find this project on <a href="https://github.com/captainkerk/ballin-octo-spice">GitHib!</a></p>
+        <p class="text-muted">Copyleft 2015 John Kerkstra - Find this project on <a href="https://github.com/captainkerk/octo-robot-dangerzone">GitHib!</a></p>
     </div>
 </footer>
 
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
 
 <script>
 
@@ -160,7 +160,7 @@ $(document).ready(function() {
         });
 
         request.done(function (response, textStatus, jqXHR){
-            
+
             $('#username').val('');
             $('#bio').val('');
             $('#quote').val('');
@@ -168,54 +168,79 @@ $(document).ready(function() {
     });
 
 
+    $('#updateUserForm').submit(function(event) {
+        event.preventDefault();
+        var jsonForm = JSON.stringify($('#uUserForm').serializeObject());
 
+        request = $.ajax({
+            url: '/updateUser',
+            type: 'post',
+            contentType: 'application/json',
+            data: jsonForm
+        });
+        request.done(function (response, textStatus, jqXHR){
 
-    //nav buttons
-    $('#home').click(function(){
-        $('#create-user').hide();
-        $('#users-result').innerHTML = '';
-        getUsers();
-        $('#monitor').show();
+        });
     });
-    $('#add-user').click(function() {
-        $('#create-user').show();
-        $('#monitor').hide();
-    });
-
-    //functions for user stuff
-    function getUsers() {
-
-        var users = [];
-        $('#monitors-users').html('');
-
-        request=$.get( '/users', function( data ) {
-
-            for(i = 0; i < data.length; i++) {
-                var user = new Object();
-                user = data.users[i];
-                users.push(user);
-            }
-            $('#monitors-users').append('<div class="up">Database monitor is reporting ok.</div>');
-        });
-
-        request.error(function(jqXHR, textStatus, errorThrow){
-
-            $('#monitors-users').append('<div class="down">Database monitor is down.</div>');
-        });
-        request.always(function () {
-            drawUsers(users);
-        });
-    }
-
-    function drawUsers(users) {
-        $('#users-result').empty();
-
-        users.forEach(function(user) {
-            $('#users-result').append('<li>' + user.user.Username+ '</li>');
-        });
-    }
 });
 
+
+var visibleDiv = "#monitor";
+var isRunning = false;
+
+$(".action").click(function() {
+  if(!isRunning) {
+    isRunning = true;
+    var newDiv = $(this).data("action");
+    if(newDiv === visibleDiv) {
+        $(visibleDiv).effect( "shake", {direction: "up",times:2,distance: 10}, "slow" );
+        setTimeout(function(){
+            isRunning = false;
+        }, 500);
+    }
+    else {
+        if(newDiv === '#monitor'){
+            getUsers();
+        }
+        $(visibleDiv).hide('slide', 500);
+        setTimeout(function(){
+          $(newDiv).show('slide', 500);
+        }, 500);
+        visibleDiv = newDiv;
+        setTimeout(function(){
+            isRunning = false;
+        }, 1000);
+    }
+  }
+});
+
+function getUsers() {
+    var users = [];
+    $('#monitors-users').html('');
+
+    request=$.get( '/users', function( data ) {
+        for(i = 0; i < data.length; i++) {
+            var user = new Object();
+            user = data.users[i];
+            users.push(user);
+        }
+        $('#monitors-users').append('<div class="up">Database monitor is reporting ok.</div>');
+    });
+
+    request.error(function(jqXHR, textStatus, errorThrow){
+        $('#monitors-users').append('<div class="down">Database monitor is down.</div>');
+    });
+    request.always(function () {
+        drawUsers(users);
+    });
+}
+
+function drawUsers(users) {
+    $('#users-result').empty();
+    users.forEach(function(user) {
+        $('#users-result').append('<li>' + user.user.Username+ '</li>');
+    });
+}
 
 //marshall json function
 $.fn.serializeObject = function()

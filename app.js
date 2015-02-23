@@ -4,7 +4,7 @@ var aws = require('aws-sdk');
 var crypto = require('crypto');
 var bodyParser = require('body-parser');
 
-aws.config.loadFromPath('/code/awsconfig/aws.config');
+aws.config.loadFromPath('./aws.config');
 
 //parse POSTs as JSON
 app.use(bodyParser.json());
@@ -90,6 +90,34 @@ app.post('/createUser', function (req, res) {
 	},
 	function(result) {
 			res.json({status : "ok"});
+	});
+});
+
+app.post('/updateUser', function(req, res) {
+	var db = new aws.DynamoDB();
+ 	var userID = req.body.userID;
+	var username = req.body.username;
+	var quote = req.body.quote;
+	var bio = req.body.bio;
+
+	db.updateItem({
+		'TableName': 'Users',
+		'Key': 	{
+				'UserID': {
+					'S': userID
+				}
+		},
+		'UpdateExpression': 'set Bio = :val1, Username = :val2, Quote = :val3',
+		'ExpressionAttributeValues': {
+			':val1': {'S': bio},
+			':val2': {'S': username},
+			':val3': {'S': quote}
+		},
+		'ReturnValues': 'ALL_NEW'
+	},
+	function(result) {
+		console.log('ok');
+		res.json({status : 'ok'});
 	});
 });
 
