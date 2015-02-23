@@ -4,7 +4,7 @@ var aws = require('aws-sdk');
 var crypto = require('crypto');
 var bodyParser = require('body-parser');
 
-aws.config.loadFromPath('./aws.config');
+aws.config.loadFromPath('/code/awsconfig/aws.config');
 
 //parse POSTs as JSON
 app.use(bodyParser.json());
