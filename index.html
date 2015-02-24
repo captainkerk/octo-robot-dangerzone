@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Demo for Civis!</title>
+    <title>AWS Demo!</title>
 
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="./css/custom.css" rel="stylesheet">
@@ -22,7 +22,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Civis Demo</a>
+            <a class="navbar-brand" href="#">AWS Demo</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -76,6 +76,9 @@
 
 
       </form>
+      <br>
+      <br>
+      <p>This is using jQuery AJAX to POST to a RESTful web service that inserts a 'User' into a DynamoDB instance.</p>
     </div>
 
     <div class="jumbotron" id="update-user" hidden>
@@ -83,32 +86,29 @@
 
           <p>Update an existing User:</p>
             <p>Select a User:</p>
-            <select id="userSelector" name="modelSelector" class="selector form-control">
+            <select id="updateUserSelector" name="updateUserSelector" class="selector form-control">
                 <option value=""></option>
             </select>
 
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" id="deleteModelCheckbox">Delete User
-                </label>
+            <div>
+                <div hidden><h3>User Name: </h3><input type="text" class="form-control" placeholder="model name" id="uusername" name="username"></div>
+                <div hidden><input type="text" class="form-control" placeholder="userID" id="uuserID" name="userID"></div>
+                <p>Bio: </p><input type="text" class="form-control" id="ubio" name="bio">
+                <p>Quote: </p><input type="text" class="form-control" id="uquote" name="quote"
             </div>
-            <div class="alert alert-danger" role="alert" id="alertDeleteModel"hidden>User will be deleted.</div>
-            <div id="modelFormWrapper">
-            <div hidden><h3>User Name: </h3><input type="text" class="form-control" placeholder="model name" id="username" name="username" disabled></div>
-            <p>Bio: </p><input type="text" class="form-control" placeholder="bio" id="bio" name="bio">
-            <p>Quote: </p><input type="text" class="form-control" placeholder="quote" id="quote" name="quote">
-
-
-            </div>
-
             <br>
             <br>
 
             <input type="submit" class="btn btn-primary" value="Update" id="updateUserBtn"/>
             <br>
-            <div id="notificationCenter"></div>
+            <br>
+            <div id="updateNotificationCenter"></div>
 
       </form>
+
+      <br>
+      <br>
+      <p>This uses jQuery AJAX to first GET a list of current users from a web service, then allows the user to edit the information. The user can then choose to commit the update by an AJAX POST method to a web service that updates the entry.</p>
     </div>
 
 </div> <!-- /container -->
@@ -123,29 +123,17 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+<script src="/js/actions.js"></script>
+<script src="/js/ui-controller.js"></script>
 
 <script>
 
+updateUsersList = [];
+
 $(document).ready(function() {
 
-
     getUsers();
-
-    hc1=$.get( '/hc1', function( data ) {
-        $('#monitors-result1').append('<div class="up">Monitor #1 is reporting ok.</div>');
-    });
-    hc1.error(function(jqXHR, textStatus, errorThrow){
-        $('#monitors-result1').append('<div class="down">Monitor #1 is down.</div>');
-    });
-
-    hc2=$.get( '/hc2', function( data ) {
-        $('#monitors-result2').append('<div class="up">Monitor #2 is reporting ok.</div>');
-    });
-    hc2.error(function(jqXHR, textStatus, errorThrow){
-        $('#monitors-result2').append('<div class="down">Monitor #2 is down.</div>');
-    });
-
-
+    monitors();
 
     $('#createUserForm').submit(function(event) {
 
@@ -160,7 +148,6 @@ $(document).ready(function() {
         });
 
         request.done(function (response, textStatus, jqXHR){
-
             $('#username').val('');
             $('#bio').val('');
             $('#quote').val('');
@@ -170,7 +157,7 @@ $(document).ready(function() {
 
     $('#updateUserForm').submit(function(event) {
         event.preventDefault();
-        var jsonForm = JSON.stringify($('#uUserForm').serializeObject());
+        var jsonForm = JSON.stringify($('#updateUserForm').serializeObject());
 
         request = $.ajax({
             url: '/updateUser',
@@ -179,68 +166,20 @@ $(document).ready(function() {
             data: jsonForm
         });
         request.done(function (response, textStatus, jqXHR){
-
+            $("#updateNotificationCenter").append('<div class="alert alert-success">Success! User updated!</div>');
         });
     });
+
+
+    $("#updateUserSelector").change(function() {
+        var value = $(this).val();
+        var user = updateUsersList[value];
+        $('#uusername').val(user.user.Username);
+        $('#ubio').val(user.user.Bio);
+        $('#uuserID').val(user.user.UserID);
+        $('#uquote').val(user.user.Quote);
+    });
 });
-
-
-var visibleDiv = "#monitor";
-var isRunning = false;
-
-$(".action").click(function() {
-  if(!isRunning) {
-    isRunning = true;
-    var newDiv = $(this).data("action");
-    if(newDiv === visibleDiv) {
-        $(visibleDiv).effect( "shake", {direction: "up",times:2,distance: 10}, "slow" );
-        setTimeout(function(){
-            isRunning = false;
-        }, 500);
-    }
-    else {
-        if(newDiv === '#monitor'){
-            getUsers();
-        }
-        $(visibleDiv).hide('slide', 500);
-        setTimeout(function(){
-          $(newDiv).show('slide', 500);
-        }, 500);
-        visibleDiv = newDiv;
-        setTimeout(function(){
-            isRunning = false;
-        }, 1000);
-    }
-  }
-});
-
-function getUsers() {
-    var users = [];
-    $('#monitors-users').html('');
-
-    request=$.get( '/users', function( data ) {
-        for(i = 0; i < data.length; i++) {
-            var user = new Object();
-            user = data.users[i];
-            users.push(user);
-        }
-        $('#monitors-users').append('<div class="up">Database monitor is reporting ok.</div>');
-    });
-
-    request.error(function(jqXHR, textStatus, errorThrow){
-        $('#monitors-users').append('<div class="down">Database monitor is down.</div>');
-    });
-    request.always(function () {
-        drawUsers(users);
-    });
-}
-
-function drawUsers(users) {
-    $('#users-result').empty();
-    users.forEach(function(user) {
-        $('#users-result').append('<li>' + user.user.Username+ '</li>');
-    });
-}
 
 //marshall json function
 $.fn.serializeObject = function()

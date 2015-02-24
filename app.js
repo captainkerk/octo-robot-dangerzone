@@ -17,6 +17,14 @@ app.get('/css/custom.css', function(req, res){
 	res.sendFile(__dirname + '/css/custom.css');
 });
 
+app.get('/js/actions.js', function(req, res){
+	res.sendFile(__dirname + '/js/actions.js');
+});
+
+app.get('/js/ui-controller.js', function(req, res){
+	res.sendFile(__dirname + '/js/ui-controller.js');
+});
+
 app.get('/hc1', function(req, res){
     	res.setHeader('Content-Type', 'application/json');
     	res.end(JSON.stringify({ a: 1 }));
