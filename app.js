@@ -84,7 +84,7 @@ app.post('/createUser', function (req, res) {
   	var username = req.body.username;
 	var bio = req.body.bio;
 	var quote = req.body.quote;
-	var id = crypto.randomBytes(6).toString('hex');
+	var id = crypto.randomBytes(8).toString('hex');
 	var db = new aws.DynamoDB();
 
 	db.putItem({

@@ -78,6 +78,9 @@
       </form>
       <br>
       <br>
+      <div id="createNotificationCenter"></div>
+      <br>
+      <br>
       <p>This is using jQuery AJAX to POST to a RESTful web service that inserts a 'User' into a DynamoDB instance.</p>
     </div>
 
@@ -151,6 +154,7 @@ $(document).ready(function() {
             $('#username').val('');
             $('#bio').val('');
             $('#quote').val('');
+            $("#createNotificationCenter").append('<div class="alert alert-success">Success! User updated!</div>');
         });
     });
 
