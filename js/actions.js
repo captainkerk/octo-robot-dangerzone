@@ -27,15 +27,23 @@ function drawUsers(users) {
 
         var strToPrint = '<li>';
 
+        var username = '';
+        var userdata = '';
+
         for(k = 0; k < keyArray.length; k++)
         {
             if(keyArray[k] != 'UserID'){
-                strToPrint += keyArray[k] + ': ' + user.user[keyArray[k]];
-                strToPrint += '<br>';
+                if(keyArray[k] == 'Username') {
+                    username = '<h4>' + keyArray[k] + ': ' + user.user[keyArray[k]] + '</h4>';
+                }
+                else {
+                    userdata += keyArray[k] + ': ' + user.user[keyArray[k]];
+                    userdata += '<br>';
+                }
             }
         }
 
-        strToPrint += '</li>';
+        strToPrint += username + userdata + '</li>';
 
         $('#users-result').append(strToPrint);
     });
